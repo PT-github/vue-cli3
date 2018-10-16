@@ -1,10 +1,22 @@
 import Vue from 'vue'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
 import App from '@/components/App.vue'
 import '@/filter'
+import '@/directive'
 import router from './router'
 import store from './store/store'
+import storage from '@/utils/storage'
+
+let token = storage.getItem('token') || ''
+if (token) {
+  store.dispatch('SetToken', token)
+}
 
 Vue.config.productionTip = false
+
+
 
 new Vue({
   router,
