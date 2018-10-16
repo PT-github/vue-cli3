@@ -5,6 +5,7 @@ Vue.use(ElementUI)
 import App from '@/components/App.vue'
 import '@/filter'
 import '@/directive'
+import '@/utils/mixin'
 import router from './router'
 import store from './store/store'
 import storage from '@/utils/storage'
