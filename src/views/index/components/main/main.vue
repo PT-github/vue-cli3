@@ -7,7 +7,7 @@
   </div>
 </template>
 <script>
-// import { login } from '../../store//api'
+// import { login } from '../../store/api'
 export default {
   name: 'Main',
   methods: {

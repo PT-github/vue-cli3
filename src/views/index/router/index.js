@@ -40,7 +40,7 @@ const router = new Router({
     {
       path: '/noAuth',
       name: 'noAuth',
-      component: () => import(/* webpackPrefetch: true, webpackChunkName: "noAuth" */ '@/views/page/noAuth.vue')
+      component: () => import(/* webpackChunkName: "noAuth" */ '@/views/page/noAuth.vue')
     },
     {
       path: '*',
@@ -49,7 +49,7 @@ const router = new Router({
       // this generates a separate chunk (404.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       // 如果该组件需要预先加载 注入webpackPrefetch: true
-      component: () => import(/* webpackPrefetch: true, webpackChunkName: "404" */ '@/views/page/404.vue')
+      component: () => import(/* webpackChunkName: "404" */ '@/views/page/404.vue')
     }
   ]
 })
