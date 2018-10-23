@@ -8,6 +8,12 @@ const router = new Router({
   routes: [
     {
       path: '/',
+      name: 'test',
+      component: () => import(/* webpackChunkName: "main" */ '@/views/index/components/test/testdrag.vue'),
+      meta: { title: '拖拽测试' }
+    },
+    {
+      path: '/root',
       name: 'home',
       component: Layout,
       redirect: { name: 'main' },

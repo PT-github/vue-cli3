@@ -3,8 +3,13 @@ module.exports = {
     // 移除 prefetch 插件 （首次加载无需一次性全部加载所有的chunk）
     config.plugins.delete('prefetch')
   },
+  // configureWebpack: {
+  //   // plugins: [
+  //   //   new webpack.ProvidePlugin()
+  //   // ]
+  // },
   devServer: {
-    host: 'localhost',
+    host: '0.0.0.0',
     port: 9001,
     hot: true,          // 开启热更新
     overlay: true,      // 开启报错提示显示在浏览器遮罩层
