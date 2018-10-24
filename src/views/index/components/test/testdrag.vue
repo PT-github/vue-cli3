@@ -188,6 +188,7 @@ export default {
 <style lang="scss" scoped>
 .test-container {
   .storage-area {
+    position: relative;
     border: 1px solid red;
     background-color: #999;
     width: 500px;
