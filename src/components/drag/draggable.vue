@@ -63,27 +63,38 @@ export default {
       index: '',
       dragging: false, // 拖拽中
       dragenterDomIndex: '', // 拖拽进入的dom标识
+      needConfirm: false, // 是否需要二次确认
+      storageList: [],
+      storageTempIndex: ''
     }
   },
   methods: {
     dragstart (e, idx) {
-      console.log(this)
       this.index = idx
-      this.dragging = true
-      e.dataTransfer.setData("idx", idx);
+      e.dataTransfer.setData("idx", idx); // firefox必须有数据才允许拖拽
       // 开始拖拽
-      this.$nextTick(() => {
-        console.log('开始拖拽', e.target)
-      })
-      
     },
-    drag () {
+    drag (e) {
       // 正在拖拽中
-      // console.log('正在拖拽中')
+      let width = this.$el.offsetWidth,
+        height = this.$el.offsetHeight,
+        left = this.$el.getBoundingClientRect().left,
+        top = this.$el.getBoundingClientRect().top,
+        clientX = e.clientX,
+        clientY = e.clientY
+      if (clientX > (left + width) || clientX < left || clientY > (top + height) || clientY < top) {
+        // 拖拽离开容器 reset样式
+        this.dragging = false
+        this.dragenterDomIndex = ''
+      } else {
+        this.dragging = true
+      }
     },
-    dragend (e) {
+    dragend () {
       // 拖拽结束
-      console.log('拖拽结束', e.target)
+      if (!this.needConfirm) {
+        this.reset()
+      }
     },
     dragenter (e, idx) {
       let dom = this.fiterDraggableDom(e.target)
@@ -103,13 +114,12 @@ export default {
     },
     drop (e, idx) {
       e.preventDefault()
+      console.log('AAAAAAAAAAAAAA')
       let dom = this.fiterDraggableDom(e.target)
-      console.log(dom, '=====')
       if (dom) {
         // 内部拖拽
         if (this.index === idx) {
           // 没有拖动
-          this.reset()
           return
         }
         console.log('移动拖动的元素到所选择的放置目标节点====', this.index, idx, dom)
@@ -120,8 +130,6 @@ export default {
             duration: 1000,
             showClose: true
           })
-          this.reset()
-          return
         } else if (this.sortList[this.index].mutex && this.sortList[this.index].mutex.length > 0 && this.sortList[this.index].mutex.indexOf(this.sortList[idx].id) !== -1) {
           this.$message({
             message: '互斥 不允许拖动',
@@ -129,19 +137,20 @@ export default {
             duration: 1000,
             showClose: true
           })
-          this.reset()
-          return
         } else if (this.sortList[idx].public) {
+          this.needConfirm = true
           this.$confirm('确认是否将该课程调整到公共课', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
             center: true
           }).then(() => {
+            this.needConfirm = false
             this.sort(idx)
-          }).catch(() => {
             this.reset()
-            return
+          }).catch(() => {
+            this.needConfirm = false
+            this.reset()
           });
         } else {
           this.sort(idx)
@@ -163,9 +172,6 @@ export default {
         this.sortList.splice(this.index + 1, 0, this.sortList[idx + 1])
         this.sortList.splice(idx + 1, 1)
       }
-      this.$nextTick(() =>{
-        this.reset()
-      })
     },
     reset () {
       this.dragging = false
@@ -189,8 +195,14 @@ export default {
   position: relative;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   .el-draggable {
-    width: 20%;
+    width: 19%;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    &:nth-child(5n) {
+      margin-right: 0;
+    }
     text-align: center;
     background: #fdcccc;
     border: 1px solid #000;
