@@ -16,13 +16,14 @@
           'bottomSpace': idx >= 15 && idx < 20 // 底部空隙
         }"
         :draggable="draggable" >
-        <div class="title">{{ item.name + (item.mutex ? '【有拖拽限制[' + item.mutex.join(',') + ']】' : '') }}</div>
-        <div class="text">（{{ item.teacher }}）</div>
+        <div class="title">{{ item.name ? (item.name + (item.mutex ? '【有拖拽限制[' + item.mutex.join(',') + ']】' : '')) : '' }}</div>
+        <div class="text">{{ item.teacher ? '（' + item.teacher + '）' : '' }}</div>
       </div>
     </template>
   </div>
 </template>
 <script>
+import { isEmptyObject } from '@/utils'
 export default {
   name: 'elDraggable',
   props: {
@@ -86,14 +87,26 @@ export default {
         // 拖拽离开容器 reset样式
         this.dragging = false
         this.dragenterDomIndex = ''
+        // 记录拖拽的下标
+        this.storageTempIndex = this.index
       } else {
         this.dragging = true
+        // 移除拖拽出界的下标
+        this.storageTempIndex = ''
       }
+    },
+    removeData (index) {
+      this.$set(this.sortList, index, {})
     },
     dragend () {
       // 拖拽结束
       if (!this.needConfirm) {
         this.reset()
+        if (this.storageTempIndex) {
+          let o = this.sortList[this.storageTempIndex]
+          // 拖拽出界
+          !isEmptyObject(o) && this.$emit('dragOutOfBound', this.storageTempIndex, o)
+        }
       }
     },
     dragenter (e, idx) {
@@ -114,7 +127,6 @@ export default {
     },
     drop (e, idx) {
       e.preventDefault()
-      console.log('AAAAAAAAAAAAAA')
       let dom = this.fiterDraggableDom(e.target)
       if (dom) {
         // 内部拖拽
@@ -122,7 +134,6 @@ export default {
           // 没有拖动
           return
         }
-        console.log('移动拖动的元素到所选择的放置目标节点====', this.index, idx, dom)
         if (this.sortList[this.index].name === this.sortList[idx].name && this.sortList[this.index].teacher === this.sortList[idx].teacher) {
           this.$message({
             message: '目标相同 不允许拖动',

@@ -1,11 +1,19 @@
 <template>
   <div class="test-container">
-    <draggable :list="list" :options="options"></draggable>
+    <div class="drag-content">
+      <draggable ref="drag" :list="list" :options="options" @dragOutOfBound="dragOutOfBound"></draggable>
+    </div>
     <p style="margin-top: 20px;margin-bottom: 10px;">暂存区</p>
     <div class="storage-area"
-      @dragover="dragover"
-      @drop="drop($event, idx)">
-      
+      @dragover="dragoverStorage"
+      @drop="dropStorage"
+      @dragenter="dragenterStorage"
+      @dragleave="drageleaveStorage"
+      >
+      <div class="draggable-n" v-for="(item, index) in storageList" :key="'draggable_n-' + index" >
+        <div class="title">{{ item.name ? (item.name + (item.mutex ? '【有拖拽限制[' + item.mutex.join(',') + ']】' : '')) : '' }}</div>
+        <div class="text">{{ item.teacher ? '（' + item.teacher + '）' : '' }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -169,15 +177,46 @@ export default {
           public: true
         }
       ],
-      storageList: []
+      dragToStorage: false,
+      storageList: [
+        {
+          id: 1,
+          name: 'AAAAA',
+          teacher: 'BBBBBBBBBB'
+        }
+      ]
     }
   },
   methods: {
-    dragover (e) {
-      console.log(e.target)
+    dragOutOfBound(index, o) {
+      if (this.dragToStorage) {
+        this.storageList.push(o)
+        this.$refs.drag.removeData(index)
+        this.dragToStorage = false
+      }
     },
-    drop (e) {
-      console.log(e.target, '=============')
+    dragenterStorage () {
+      console.log('enter')
+      // console.log('dragenterStorage')
+      // this.storageTempIndex = this.index
+      // console.log(this.storageTempIndex, '==============')
+    },
+    drageleaveStorage () {
+      console.log('leave')
+      // console.log('drageleaveStorage')
+      // this.storageTempIndex = ''
+    },
+    dragoverStorage (e) {
+      e.preventDefault()
+      this.dragToStorage = true
+      // this.storageList.push(this.sortList[this.index])
+      // this.$set(this.sortList, this.index, {
+      //   name: '',
+      //   teacher: ''
+      // })
+    },
+    dropStorage () {
+      console.log('22222222222')
     }
   },
   components: {
@@ -187,19 +226,44 @@ export default {
 </script>
 <style lang="scss" scoped>
 .test-container {
+  .drag-content {
+    margin: 50px 10px;
+    border: 1px solid red;
+    position: relative;
+  }
   .storage-area {
     position: relative;
     border: 1px solid red;
-    background-color: #999;
-    width: 500px;
-    height: 300px;
+    width: 872px;
+    min-height: 100px;
     border-radius: 5px;
-    background-image: url(/static/images/logo2.png);
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    align-content: baseline;
+    .draggable-n {
+      width: 170px;
+      height: 60px;
+      border: 1px solid #000;
+      border-radius: 5px;
+      background: #fdcccc;
+      cursor: pointer;
+      margin-bottom: 5px;
+      margin-right: 5px;
+      &:nth-child(5n) {
+        margin-right: 0;
+      }
+      .title {
+        height: 35px;
+        line-height: 35px;
+      }
+      .text {
+        height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+      }
+    }
   }
 }
-</style>
-<style lang="scss">
-    
 </style>
 

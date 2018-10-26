@@ -3,7 +3,13 @@ export const km2 = (m) => {
   if (isNaN(m)) { m = 0; }
   return (m / 1000).fixed(2);
 };
-
+/* 工具类 */
+export const isEmptyObject = (o) => {
+  for (let key in o) {
+    return false
+  }
+  return true
+};
 /**
  * 随机数，10位时间戳 连接4位随机整数 e.g. 1428910956 + "" +3482
  * @example $.zUtils.random14(newTime);
