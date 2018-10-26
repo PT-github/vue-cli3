@@ -55,6 +55,8 @@ export default {
         this.sortList.push(item)
       });
     }
+    // this.dragImg = new Image()
+    // this.dragImg.src = require('../../assets/logo.png')
   },
   computed: {
     draggable () {
@@ -77,6 +79,7 @@ export default {
       needConfirm: false, // 是否需要二次确认
       storageList: [],
       storageTempIndex: ''
+      // dragImg: null
     }
   },
   methods: {
@@ -94,9 +97,8 @@ export default {
     },
     dragstart (e, idx) {
       this.index = idx
-      console.log('222222222222')
       e.dataTransfer.setData("Text", 'Hello World'); // firefox必须有数据才允许拖拽
-      console.log('333333333333')
+      // e.dataTransfer.setDragImage(this.dragImg, 10, 10) // IE不支持 移除该功能
       // e.target.parentElement.appendChild(this.createElement(e.target, this.sortList[idx]))
       // 开始拖拽
     },
