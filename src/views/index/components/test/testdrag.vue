@@ -13,6 +13,8 @@
       <div class="draggable-n"
         @dragstart="dragstart($event, index)"
         @dragend="dragend"
+        @dragover="dragover"
+        @drop="drop"
         draggable="true"
         v-for="(item, index) in storageList"
         :key="'draggable_n-' + index" >
@@ -194,10 +196,19 @@ export default {
       this.storageDragging = true
       this.storageDragDataIndex = index
       this.storageDragData = this.storageList[index]
+      e.dataTransfer.setData('TEXT', 'AAAAAAAAAA'); // firefox必须有数据才允许拖拽
     },
     dragend () {
       this.storageDragging = false
       this.$refs.drag.reset()
+    },
+    dragover (e) {
+      console.log('111111111')
+      e.preventDefault()
+    },
+    drop (e) {
+      console.log('2222')
+      e.preventDefault()
     },
     exchangeData (o) {
       if (o) {
@@ -233,8 +244,9 @@ export default {
       //   teacher: ''
       // })
     },
-    dropStorage () {
-      console.log('22222222222')
+    dropStorage (e) {
+      e.stopPropagation();
+      e.preventDefault();
     }
   },
   components: {

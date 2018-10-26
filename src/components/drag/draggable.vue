@@ -80,9 +80,24 @@ export default {
     }
   },
   methods: {
+    createElement (target, data) {
+      let div = document.createElement('div')
+      div.className = 'el-draggable-clone'
+      div.style.top = target.offsetTop + 'px'
+      div.style.left = target.offsetLeft + 'px'
+      div.style.zIndex = -1
+      div.innerHTML = `
+        <div class="title">${data.name}</div>
+        <div class="text">${data.teacher}</div>
+      `
+      return div
+    },
     dragstart (e, idx) {
       this.index = idx
-      e.dataTransfer.setData("idx", idx); // firefox必须有数据才允许拖拽
+      console.log('222222222222')
+      e.dataTransfer.setData("Text", 'Hello World'); // firefox必须有数据才允许拖拽
+      console.log('333333333333')
+      // e.target.parentElement.appendChild(this.createElement(e.target, this.sortList[idx]))
       // 开始拖拽
     },
     drag (e) {
@@ -121,6 +136,7 @@ export default {
       }
     },
     dragenter (e, idx) {
+      console.log(e.target)
       let dom = this.fiterDraggableDom(e.target)
       
       // 拖拽到目标dom中 - 判断是否为el-draggable_group容器
@@ -128,17 +144,20 @@ export default {
         this.dragenterDomIndex = idx
       }
     },
-    dragleave (e) {
-      if (e.target.className.indexOf('el-draggable_group') !== -1) {
-        // console.log('【离开目标dom】', e.target)
-      }
+    dragleave () {
+      // if (e.target.className.indexOf('el-draggable_group') !== -1) {
+      //   // console.log('【离开目标dom】', e.target)
+      // }
     },
     dragover (e) {
       e.preventDefault()
       // console.log('放下目标界面是触发事件', e.target)
     },
     drop (e, idx) {
-      e.preventDefault()
+      // e.preventDefault()
+      e.stopPropagation();
+      e.preventDefault();
+      // e.dataTransfer = e.originalEvent.dataTransfer;
       let dom = this.fiterDraggableDom(e.target)
       if (dom) {
         // 外部暂存区拖拽到组件内的拖拽区域内
@@ -228,7 +247,7 @@ export default {
     },
     fiterDraggableDom (target) {
       let dom
-      if (target.className.indexOf('el-draggable_group') !== -1) {
+      if (target.className && target.className.indexOf('el-draggable_group') !== -1) {
         dom = target
       } else if (target.parentElement.className.indexOf('el-draggable_group') !== -1) {
         dom = target.parentElement
@@ -277,6 +296,27 @@ export default {
   }
   .item-draggable-in-not-allow {
     background: #ccc;
+  }
+}
+</style>
+<style lang="scss">
+.el-draggable-container {
+  .el-draggable-clone {
+    position: absolute;
+    width: 19%;
+    text-align: center;
+    background: black;
+    border: 1px solid #000;
+    border-radius: 5px;
+    .title {
+      height: 35px;
+      line-height: 35px;
+    }
+    .text {
+      height: 20px;
+      line-height: 20px;
+      font-size: 12px;
+    }
   }
 }
 </style>
