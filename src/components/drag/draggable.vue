@@ -10,8 +10,8 @@
         @dragover="dragover"
         @drop="drop($event, idx)"
         :class="{
-          'item-draggable-in-not-allow': draggableData && draggableData.mutex && draggableData.mutex.indexOf(item.id) !== -1, // 正在拖拽，该组件不允许被放置
-          'item-draggabled': dragging && idx !== index, // 正在拖拽 其他科拖拽dom的样式
+          'item-draggable-in-not-allow': (draggableData && draggableData.mutex && draggableData.mutex.indexOf(item.id) !== -1) || (storageDragData && storageDragData.mutex && storageDragData.mutex.indexOf(item.id) !== -1) , // 正在拖拽，该组件不允许被放置
+          'item-draggabled': (dragging && idx !== index) || storageDragging, // 正在拖拽 其他科拖拽dom的样式
           'item-draggable-in': dragenterDomIndex === idx, // 拖拽进入
           'bottomSpace': idx >= 15 && idx < 20 // 底部空隙
         }"
@@ -37,6 +37,16 @@ export default {
       type: Array,
       required: false,
       default: null
+    },
+    storageDragging: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    storageDragData: {
+      type: Object,
+      required: false,
+      default: () => {}
     }
   },
   created () {
@@ -102,8 +112,9 @@ export default {
       // 拖拽结束
       if (!this.needConfirm) {
         this.reset()
-        if (this.storageTempIndex) {
+        if (this.storageTempIndex || this.storageTempIndex === 0) {
           let o = this.sortList[this.storageTempIndex]
+          console.log('拖拽出界')
           // 拖拽出界
           !isEmptyObject(o) && this.$emit('dragOutOfBound', this.storageTempIndex, o)
         }
@@ -111,6 +122,7 @@ export default {
     },
     dragenter (e, idx) {
       let dom = this.fiterDraggableDom(e.target)
+      
       // 拖拽到目标dom中 - 判断是否为el-draggable_group容器
       if (dom && this.index!== idx) {
         this.dragenterDomIndex = idx
@@ -129,6 +141,34 @@ export default {
       e.preventDefault()
       let dom = this.fiterDraggableDom(e.target)
       if (dom) {
+        // 外部暂存区拖拽到组件内的拖拽区域内
+        if (this.storageDragging) {
+          console.log('外部暂存区拖拽到组件内拖拽区域上')
+          // 判断是会否有有限制
+          let obj = this.storageDragData, targetObj = this.sortList[idx]
+          if (isEmptyObject(targetObj)) {
+            // 目标元素是空元素 那么直接放置被拖拽的组件
+            console.log('目标元素是空元素')
+            this.$set(this.sortList, idx, obj)
+            this.$emit('exchangeData', null)
+          } else if (obj && obj.mutex && obj.mutex.length > 0 && obj.mutex.indexOf(targetObj.id) !== -1) {
+            console.log('有限制 不能拖拽')
+            // 有限制 不能拖拽
+            this.$message({
+              message: '互斥 不允许拖动',
+              type: 'error',
+              duration: 1000,
+              showClose: true
+            })
+            return
+          } else {
+            // 调换数据
+            console.log('调换数据')
+            this.$emit('exchangeData', targetObj)
+            this.$set(this.sortList, idx, obj)
+          }
+          return
+        }
         // 内部拖拽
         if (this.index === idx) {
           // 没有拖动
@@ -166,9 +206,6 @@ export default {
         } else {
           this.sort(idx)
         }
-      } else if (e.target.className.indexOf('storage-area') !== -1) {
-        console.log('外部拖拽')
-        this.reset()
       }
     },
     sort (idx) {

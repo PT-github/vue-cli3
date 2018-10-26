@@ -1,7 +1,7 @@
 <template>
   <div class="test-container">
     <div class="drag-content">
-      <draggable ref="drag" :list="list" :options="options" @dragOutOfBound="dragOutOfBound"></draggable>
+      <draggable ref="drag" :storageDragging="storageDragging" :storageDragData="storageDragData" :list="list" :options="options" @dragOutOfBound="dragOutOfBound" @exchangeData="exchangeData"></draggable>
     </div>
     <p style="margin-top: 20px;margin-bottom: 10px;">暂存区</p>
     <div class="storage-area"
@@ -10,7 +10,12 @@
       @dragenter="dragenterStorage"
       @dragleave="drageleaveStorage"
       >
-      <div class="draggable-n" v-for="(item, index) in storageList" :key="'draggable_n-' + index" >
+      <div class="draggable-n"
+        @dragstart="dragstart($event, index)"
+        @dragend="dragend"
+        draggable="true"
+        v-for="(item, index) in storageList"
+        :key="'draggable_n-' + index" >
         <div class="title">{{ item.name ? (item.name + (item.mutex ? '【有拖拽限制[' + item.mutex.join(',') + ']】' : '')) : '' }}</div>
         <div class="text">{{ item.teacher ? '（' + item.teacher + '）' : '' }}</div>
       </div>
@@ -178,16 +183,29 @@ export default {
         }
       ],
       dragToStorage: false,
-      storageList: [
-        {
-          id: 1,
-          name: 'AAAAA',
-          teacher: 'BBBBBBBBBB'
-        }
-      ]
+      storageList: [],
+      storageDragging: false,
+      storageDragDataIndex: '',
+      storageDragData: null
     }
   },
   methods: {
+    dragstart (e, index) {
+      this.storageDragging = true
+      this.storageDragDataIndex = index
+      this.storageDragData = this.storageList[index]
+    },
+    dragend () {
+      this.storageDragging = false
+      this.$refs.drag.reset()
+    },
+    exchangeData (o) {
+      if (o) {
+        this.$set(this.storageList, this.storageDragDataIndex, o)
+      } else {
+        this.storageList.splice(this.storageDragDataIndex, 1)
+      }
+    },
     dragOutOfBound(index, o) {
       if (this.dragToStorage) {
         this.storageList.push(o)
